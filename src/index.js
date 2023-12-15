@@ -1,32 +1,71 @@
-import { legacy_createStore as createStore } from 'redux'
+import {legacy_createStore as createStore} from 'redux'
 
-const plus = document.getElementById('plus')
-const minus = document.getElementById('minus')
-const number = document.querySelector('span')
+const form = document.querySelector('form')
+const input = document.querySelector('input')
+const ul = document.querySelector('ul')
 
-number.innerText = "0"
-const PLUS = "PLUS"
-const MINUS = "MINUS"
+const ADD_TODO = "ADD_TODO"
+const DELETE_TODO = "DELETE_TODO"
 
-const countModifier = (currentCount = 0, action) => {
-  switch(action.type) {
-    case PLUS:
-      return currentCount + 1
-    case MINUS:
-      return currentCount - 1
-    default:
-      return currentCount
+
+const addTodo = text => {
+  return {
+    type: ADD_TODO, text
+  };
+}
+
+const deleteTodo = id => {
+  return {
+    type: DELETE_TODO,
+    id
   }
 }
 
-const countStore = createStore(countModifier)
-
-const onChange = () => {
-  // getState : reducer를 통해 리턴된 값
-  number.innerText = countStore.getState()
+const dispatchAddTodo = text => {
+  store.dispatch(addTodo(text))
 }
 
-countStore.subscribe(onChange)
-// action의 객체에는 꼭, 반드시 "type"이 있어야 함.
-plus.addEventListener('click', () => countStore.dispatch({type: PLUS}))
-minus.addEventListener('click', () => countStore.dispatch({type: MINUS}))
+const dispatchDeleteTodo = (e) => {
+  const id = parseInt(e.target.parentNode.id)
+  store.dispatch(deleteTodo(id))
+}
+
+const reducer = (state = [], action) => {
+  switch (action.type) {
+    case ADD_TODO:
+      let newTodoObj = {text: action.text, id: Date.now()};
+      return [newTodoObj, ...state]
+    case DELETE_TODO:
+      return state.filter(todo => todo.id !== action.id)
+    default:
+      return state
+  }
+}
+
+const store = createStore(reducer)
+
+const paintTodos = () => {
+  const toDos = store.getState()
+  ul.innerHTML = ''
+  toDos.forEach(todo => {
+    const li = document.createElement('li')
+    const btn = document.createElement('button')
+    btn.addEventListener('click', dispatchDeleteTodo)
+    btn.innerText = "X"
+    li.id = todo.id
+    li.innerText = todo.text
+    li.appendChild(btn)
+    ul.appendChild(li)
+  })
+}
+
+store.subscribe(paintTodos)
+
+const onSubmit = e => {
+  e.preventDefault()
+  const toDo = input.value
+  input.value = ''
+  dispatchAddTodo(toDo)
+}
+
+form.addEventListener('submit', onSubmit)
