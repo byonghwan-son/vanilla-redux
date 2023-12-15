@@ -7,7 +7,7 @@ function Detail({ toDos }) {
   const todo = toDos.find(f => f.id === id)
   return (
     <>
-      <h1>{todo.text}</h1>
+      <h1>{todo?.text}</h1>
       <h5>Created at : {(new Date(id)).toLocaleString('ko-KR')}</h5>
     </>
   );
