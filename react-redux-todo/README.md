@@ -10,7 +10,7 @@
   * 일단 store 를 통해서 state 에 접근(input, output)하기 위한 방법 
   * dispatch : action 을 통해서 state 에 값을 전달하기
   * getState : 현재 state 의 값을 가져 오기
-
+  * 각 컴포넌트 단위로 공유 값을 처리함.
 
 * connect 함수
   * state 와 dispatch 를 컴포넌트의 속성값과 연결을 시킨다.
