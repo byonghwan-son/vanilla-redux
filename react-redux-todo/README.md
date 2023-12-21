@@ -8,9 +8,24 @@
 
 * **중요 : 기존 redux 에서는 외부에서 state 를 다루기 위한 메소드 2개가 있음.**
   * 일단 store 를 통해서 state 에 접근(input, output)하기 위한 방법 
-  * dispatch : action 을 통해서 state 에 값을 전달하기
   * getState : 현재 state 의 값을 가져 오기
+  * dispatch : action 을 통해서 state 에 값을 전달하기
+  * 위의 두 메소드를 아래의 mapStateToProps, mapDispatchToProps 로 대신 처리.
   * 각 컴포넌트 단위로 공유 값을 처리함.
+    * 컴포넌트 단위로 처리가 가능하게 되는 이유
+    * Provider 를 통해서 하위 컴포넌트에서 store 를 공유할 수 있다는 것.
+    * **_store 를 공유한다는 것은 store 내부에 공유해야 할 모든 state 를 정의해야 함._**
+```javascript
+import {Provider} from "react-redux";
+import store from "./store";
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+```
 
 * connect 함수
   * state 와 dispatch 를 컴포넌트의 속성값과 연결을 시킨다.
@@ -56,4 +71,66 @@ function mapDispatchToProps(dispatch, ownProps?) {
 
 // Home 컴포넌트의 속성(props)에 할당되어서 state 를 사용할 수 있게 된다.
 connect(null, mapDispatchToProps)(Home);
+```
+## combineReducers(reducers)
+
+https://ko.redux.js.org/api/combinereducers/
+
+```javascript
+// -------------------------------------------------------------
+// todos.js
+export default function todos(state = [], action) {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return state.concat([action.text])
+    default:
+      return state
+  }
+}
+
+// -------------------------------------------------------------
+// counter.js
+export default function counter(state = 0, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1
+    case 'DECREMENT':
+      return state - 1
+    default:
+      return state
+  }
+}
+
+// -------------------------------------------------------------
+// index.js
+import { combineReducers } from 'redux'
+import todos from './todos'
+import counter from './counter'
+
+export default combineReducers({
+  todos,
+  counter
+})
+
+// -------------------------------------------------------------
+// App.js
+import { createStore } from 'redux'
+import reducer from './reducers/index'
+
+const store = createStore(reducer)
+console.log(store.getState())
+// {
+//   counter: 0,
+//   todos: []
+// }
+
+store.dispatch({
+  type: 'ADD_TODO',
+  text: 'Use Redux'
+})
+console.log(store.getState())
+// {
+//   counter: 0,
+//   todos: [ 'Use Redux' ]
+// }
 ```

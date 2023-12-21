@@ -1,22 +1,20 @@
 import {legacy_createStore as createStore} from "redux";
-import { createAction } from "@reduxjs/toolkit";
+import {createAction, createReducer} from "@reduxjs/toolkit";
 
 const addTodo = createAction('ADD');
 const deleteTodo = createAction('DELETE');
 
-console.log(addTodo(), deleteTodo(), addTodo.type, addTodo.payload)
-
-const reducer = (state = [], action) => {
-  switch(action.type) {
-    case addTodo.type:
-      const key = Date.now();
-      return [{ text : action.text, id: key, key: key}, ...state];
-    case deleteTodo.type:
-      return state.filter(todo => todo.id !== action.id);
-    default:
-      return state;
-  }
-};
+const reducer = createReducer([], (builder) =>
+  builder
+    .addCase(addTodo, (state, action) => {
+        const key = Date.now();
+        state.push({text: action.payload, id: key, key: key});
+      }
+    )
+    .addCase(deleteTodo, (state, action) =>
+      state.filter(todo => todo.id !== action.payload)
+    )
+);
 
 const store = createStore(reducer);
 
