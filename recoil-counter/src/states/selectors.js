@@ -1,5 +1,5 @@
 import {selector} from "recoil";
-import {countState} from "./atom";
+import {countState, textState} from "./atom";
 
 export const countNextState = selector({
   key: '$counterNextState',
@@ -14,5 +14,13 @@ export const randomDog = selector({
     const response = await fetch('https://dog.ceo/api/breeds/image/random');
     const data = await response.json()
     return data.message;
+  }
+})
+
+export const charCountState = selector({
+  key: 'charCountState',
+  get: ({get}) => {
+    const text = get(textState);
+    return text.length;
   }
 })

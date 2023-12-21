@@ -1,6 +1,6 @@
 import React from 'react';
 import {useRecoilValue} from "recoil";
-import {randomDog} from "./states/selectors";
+import {randomDog} from "../states/selectors";
 
 function DogImage(props) {
   const imageUrl = useRecoilValue(randomDog);

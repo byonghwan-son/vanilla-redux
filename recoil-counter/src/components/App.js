@@ -1,6 +1,6 @@
 import {useRecoilState, useRecoilValue, useResetRecoilState} from "recoil";
-import {countState} from "./states/atom";
-import {countNextState, randomDog} from "./states/selectors";
+import {countState} from "../states/atom";
+import {countNextState} from "../states/selectors";
 import React, {Suspense} from "react";
 import Loading from "./Loading";
 import DogImage from "./DogImage";
@@ -24,9 +24,9 @@ function App() {
       <h3>Count : {count}</h3>
       <button onClick={increase}>Increase</button>
       <button onClick={reset}>Reset</button>
-      <br />
-      <Suspense fallback={<Loading />}>
-        <DogImage />
+      <br/>
+      <Suspense fallback={<Loading/>}>
+        <DogImage/>
       </Suspense>
     </>
   );

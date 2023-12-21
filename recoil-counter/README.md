@@ -1,70 +1,82 @@
-# Getting Started with Create React App
+# Recoil
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 설치
+```sh
+$ npm install recoil
+```
+```sh
+$ yarn add recoil
+```
 
-## Available Scripts
+## atom 메소드
 
-In the project directory, you can run:
+상태 값을 가지는 객체 선언을 위한 `atom` 메소드
 
-### `npm start`
+```javascript
+const fontSizeState = atom({
+  key: 'fontSizeState',
+  default: 14,
+});
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## useRecoilState Hook
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+atom 으로 생성한 state 를 사용하려면 `useRecoilState` 를 사용해야 한다.  
+FontButton 컴포넌트의 버튼을 클릭하면 버튼의 텍스트 크기와 Text 컴포넌트의 텍스트 크기가 같이 커지게 된다.
 
-### `npm test`
+```javascript
+function FontButton() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  return (
+    <button onClick={() => setFontSize((size) => size + 1)} style={{fontSize}}>
+      Click to Enlarge
+    </button>
+  );
+}
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+function Text() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  return <p style={{fontSize}}>This text will increase in size too.</p>;
+}
+```
 
-### `npm run build`
+## Selectors
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Selector는 atoms나 다른 selectors를 입력으로 받아들이는 순수 함수(pure function)다. 상위의 atoms 또는 selectors가 업데이트되면 하위의 selector 함수도 다시 실행된다. 컴포넌트들은 selectors를 atoms처럼 구독할 수 있으며 selectors가 변경되면 컴포넌트들도 다시 렌더링 된다.  
+Selectors는 상태를 기반으로 하는 파생 데이터를 계산하는 데 사용된다. 최소한의 상태 집합만 atoms에 저장하고 다른 모든 파생되는 데이터는 selectors에 명시한 함수를 통해 효율적으로 계산함으로써 쓸모없는 상태의 보존을 방지한다.  
+Selectors는 어떤 컴포넌트가 자신을 필요로 하는지, 또 자신은 어떤 상태에 의존하는지를 추적하기 때문에 이러한 함수적인 접근방식을 매우 효율적으로 만든다.  
+컴포넌트의 관점에서 보면 selectors와 atoms는 동일한 인터페이스를 가지므로 서로 대체할 수 있다.  
+Selectors는 `selector` 함수를 사용해 정의한다.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```javascript
+const fontSizeLabelState = selector({
+  key: 'fontSizeLabelState',
+  get: ({get}) => {
+    const fontSize = get(fontSizeState);  // fontSizeState : atom
+    const unit = 'px';
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    return `${fontSize}${unit}`;
+  },
+});
+```
+`get` 속성은 계산될 함수다. 전달되는 `get` 인자를 통해 atoms와 다른 selectors에 접근할 수 있다. 다른 atoms나 selectors에 접근하면 자동으로 종속 관계가 생성되므로, 참조했던 다른 atoms나 selectors가 업데이트되면 이 함수도 다시 실행된다.
+이 `fontSizeLabelState` 예시에서 selector는 `fontSizeState`라는 하나의 atom에 의존성을 갖는다. 개념적으로 `fontSizeLabelState` selector는 `fontSizeState`를 입력으로 사용하고 형식화된 글꼴 크기 레이블을 출력으로 반환하는 순수 함수처럼 동작한다.  
+Selectors는 `useRecoilValue()`를 사용해 읽을 수 있다. `useRecoilValue()`는 하나의 atom이나 selector를 인자로 받아 대응하는 값을 반환한다. `fontSizeLabelState` selector는 writable하지 않기 때문에 useRecoilState()를 이용하지 않는다.  
 
-### `npm run eject`
+```javascript
+function FontButton() {
+  const [fontSize, setFontSize] = useRecoilState(fontSizeState);
+  const fontSizeLabel = useRecoilValue(fontSizeLabelState);
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  return (
+    <>
+      <div>Current font size: ${fontSizeLabel}</div>
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+      <button onClick={setFontSize(fontSize + 1)} style={{fontSize}}>
+        Click to Enlarge
+      </button>
+    </>
+  );
+}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
