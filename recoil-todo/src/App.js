@@ -1,8 +1,5 @@
 import React from "react";
-import {RecoilRoot, useRecoilValue} from "recoil";
-import TodoItemCreator from "./components/TodoItemCreator";
-import TodoItem from "./components/TodoItem";
-import {todoListState} from "./states/atoms";
+import {RecoilRoot} from "recoil";
 import TodoList from "./components/TodoList";
 
 function App() {
